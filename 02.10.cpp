@@ -28,31 +28,50 @@ void order(std::vector < int > & vector, std::size_t left, std::size_t right)
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-std::size_t separate(std::vector < int > & vector, std::size_t left, std::size_t right)
+std::size_t separate(std::vector<int>& vector, std::size_t left, std::size_t right)
 {
-    std::size_t i = left, j = right - 1;
-	while (i != j) 
-	{
-		if (vector[i] > vector[j])
-		{
-			std::swap(vector[i], vector[j]);
-			++i;
-		}
-		else
-			--j;
-	}  
-    return i + 1;
+    // pivot selection
+
+	std::size_t middle = std::midpoint(left, right - 1);
+
+    if (vector[middle] < vector[left])
+        std::swap(vector[middle], vector[left]);
+    if (vector[right - 1] < vector[left])
+        std::swap(vector[right - 1], vector[left]);
+    if (vector[right - 1] < vector[middle])
+        std::swap(vector[right - 1], vector[middle]);
+
+    int pivot = vector[middle];
+
+    // Hoar     
+	auto i = left;
+    auto j = right - 1;
+    
+    while (true)
+    {
+        while (vector[i] < pivot)
+            ++i;
+        while (vector[j] > pivot)
+            --j;
+            
+        if (i >= j)
+            return j + 1;
+            
+        std::swap(vector[i], vector[j]);
+        ++i;
+        --j;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-void split(std::vector < int > & vector, std::size_t left, std::size_t right)
+void quick_sort(std::vector < int > & vector, std::size_t left, std::size_t right)
 {
 	if (right - left > 16)
 	{
 		std::size_t separator_pos =	separate(vector, left, right);
-		split(vector, left, separator_pos);
-		split(vector, separator_pos, right);
+		quick_sort(vector, left, separator_pos);
+		quick_sort(vector, separator_pos, right);
 	}
 	else
 	{
@@ -64,33 +83,29 @@ void split(std::vector < int > & vector, std::size_t left, std::size_t right)
 
 void sort(std::vector < int > & vector)
 {
-	split(vector, 0, std::size(vector));
+	quick_sort(vector, 0, std::size(vector));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 
 int main()
 {
-	auto size = 1'000uz;
-
-//  ---------------------------------------
-
-	std::vector < int > vector(size, 0);
-
-//  ---------------------------------------
-
-	for (auto i = 0uz; i < size; ++i)
 	{
-		vector[i] = size - i;
+		auto size = 1'000uz;
+		std::vector < int > vector(size, 0);
+		for (auto i = 0uz; i < size; ++i)
+		{
+			vector[i] = size - i;
+		}
+		sort(vector);
+		assert(std::ranges::is_sorted(vector));
 	}
-
-//  ---------------------------------------
-
-	sort(vector);
-
-//  ---------------------------------------
-
-	assert(std::ranges::is_sorted(vector));
+	{
+		auto size = 1'000uz;
+		std::vector < int > vector(size, 10);
+		sort(vector);
+		assert(std::ranges::is_sorted(vector));
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
